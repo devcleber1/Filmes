@@ -1,20 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator } from 'react-native';
+
+import api from './src/services/api';
+import Films from './src/Films';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+
+  const [films, setFilms] = useState([]);
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadFilms() {
+      const response = await api.get('r-api/?api=filmes');
+      setFilms(response.data);
+      setLoading(false)
+    }
+
+    loadFilms();
+  }, []);
+
+  if(loading){
+    return(
+      <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
+        <ActivityIndicator color='#000000' size={50} />
+      </View>
+    )
+  } else{
+    return (
+      <View>
+        <FlatList
+        showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.id.toString()}
+          data={films}
+          renderItem={({ item }) => <Films data={item} />}
+        />
+      </View>
+    );
+  }
+
+
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
